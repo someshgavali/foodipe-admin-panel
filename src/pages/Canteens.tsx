@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Search, Edit2, Trash2, MapPin, Phone } from 'lucide-react';
-import { Canteen, mockCanteens } from '../data/mockData';
+import { Canteen } from '../data/mockData';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { getAllCanteens, getAllCanteensAlternative, getAllCanteensWithQuery } from '../api/adminApi/canteen'; // TypeScript import
 
 const Canteens: React.FC = () => {
-  const [canteens, setCanteens] = useState<Canteen[]>(mockCanteens);
+  const [canteens, setCanteens] = useState<Canteen[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -19,11 +21,28 @@ const Canteens: React.FC = () => {
     status: 'active' as 'active' | 'inactive'
   });
 
-  const filteredCanteens = canteens.filter(canteen =>
-    canteen.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    canteen.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    canteen.manager.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Helper function to map API response to component format
+  const mapApiCanteenToComponent = (apiCanteen: any) => ({
+    id: apiCanteen.canteenid?.toString() || Date.now().toString(),
+    name: apiCanteen.canteen_name || 'Unnamed Canteen',
+    location: apiCanteen.address || 'No location',
+    manager: apiCanteen.email || 'No manager',
+    phone: 'No phone', // API doesn't have phone field
+    status: 'active' as 'active' | 'inactive', // Default to active
+    createdAt: apiCanteen.createddate ? new Date(apiCanteen.createddate).toISOString().split('T')[0] : 'Unknown'
+  });
+
+  const filteredCanteens = canteens.filter(canteen => {
+    // First check if canteen has required properties
+    if (!canteen || typeof canteen !== 'object') {
+      return false;
+    }
+
+    // Then apply search filter
+    return (canteen.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (canteen.location?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (canteen.manager?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+  });
 
   const resetForm = () => {
     setFormData({
@@ -62,8 +81,8 @@ const Canteens: React.FC = () => {
   const handleUpdateCanteen = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedCanteen) {
-      setCanteens(canteens.map(canteen => 
-        canteen.id === selectedCanteen.id 
+      setCanteens(canteens.map(canteen =>
+        canteen.id === selectedCanteen.id
           ? { ...canteen, ...formData }
           : canteen
       ));
@@ -85,6 +104,93 @@ const Canteens: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchCanteens = async () => {
+      setIsLoading(true);
+      try {
+        // Try the main endpoint first
+        const response = await getAllCanteens({
+          start: "0",
+          limit: "10",
+          search: "",
+        });
+
+        console.log("Canteens API response:", response);
+        console.log("Response type:", typeof response);
+        console.log("Response.data:", response?.data);
+        console.log("Is response array:", Array.isArray(response));
+
+        // Update the canteens state with the API response
+        if (response && response.data && Array.isArray(response.data)) {
+          console.log("Setting canteens from response.data:", response.data);
+          // Map API fields to component fields
+          const mappedCanteens = response.data.map(mapApiCanteenToComponent);
+          setCanteens(mappedCanteens);
+        } else if (response && Array.isArray(response)) {
+          console.log("Setting canteens from direct response:", response);
+          // Map API fields to component fields
+          const mappedCanteens = response.map(mapApiCanteenToComponent);
+          setCanteens(mappedCanteens);
+        } else {
+          console.log("No valid canteen data found in response");
+          setCanteens([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch canteens with main endpoint:", error);
+
+        // Try alternative endpoints
+        try {
+          console.log("Trying alternative endpoint...");
+          const altResponse = await getAllCanteensAlternative();
+          console.log("Alternative API response:", altResponse);
+          if (altResponse && altResponse.data && Array.isArray(altResponse.data)) {
+            console.log("Setting canteens from alt response.data:", altResponse.data);
+            const mappedCanteens = altResponse.data.map(mapApiCanteenToComponent);
+            setCanteens(mappedCanteens);
+          } else if (altResponse && Array.isArray(altResponse)) {
+            console.log("Setting canteens from direct alt response:", altResponse);
+            const mappedCanteens = altResponse.map(mapApiCanteenToComponent);
+            setCanteens(mappedCanteens);
+          } else {
+            console.log("No valid canteen data in alternative response");
+          }
+        } catch (altError) {
+          console.error("Alternative endpoint also failed:", altError);
+
+          // Try with query parameters
+          try {
+            console.log("Trying with query parameters...");
+            const queryResponse = await getAllCanteensWithQuery({
+              start: "0",
+              limit: "10",
+              search: "",
+            });
+            console.log("Query API response:", queryResponse);
+            if (queryResponse && queryResponse.data && Array.isArray(queryResponse.data)) {
+              console.log("Setting canteens from query response.data:", queryResponse.data);
+              const mappedCanteens = queryResponse.data.map(mapApiCanteenToComponent);
+              setCanteens(mappedCanteens);
+            } else if (queryResponse && Array.isArray(queryResponse)) {
+              console.log("Setting canteens from direct query response:", queryResponse);
+              const mappedCanteens = queryResponse.map(mapApiCanteenToComponent);
+              setCanteens(mappedCanteens);
+            } else {
+              console.log("No valid canteen data in query response");
+            }
+          } catch (queryError) {
+            console.error("All endpoints failed:", queryError);
+            // Set empty array if all endpoints fail
+            setCanteens([]);
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCanteens();
+  }, []);
+
   const CanteenForm = ({ onSubmit, isEdit = false }: { onSubmit: (e: React.FormEvent) => void; isEdit?: boolean }) => (
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
@@ -98,7 +204,7 @@ const Canteens: React.FC = () => {
           placeholder="Enter canteen name"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
         <input
@@ -197,7 +303,7 @@ const Canteens: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search canteens..."
+            placeholder="Search canteens by name, location, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -205,63 +311,74 @@ const Canteens: React.FC = () => {
         </div>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Loading canteens...</span>
+        </div>
+      )}
+
       {/* Canteens Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCanteens.map((canteen) => (
-          <div key={canteen.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{canteen.name}</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-sm">{canteen.location}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Phone className="w-4 h-4" />
-                    <span className="text-sm">{canteen.phone}</span>
+      {!isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCanteens.map((canteen, index) => (
+            <div key={canteen.id || `canteen-${index}`} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{canteen.name || 'Unnamed Canteen'}</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <MapPin className="w-4 h-4" />
+                      <span className="text-sm">{canteen.location || 'No location'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Phone className="w-4 h-4" />
+                      <span className="text-sm">{canteen.phone || 'No phone'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                canteen.status === 'active'
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${(canteen.status || 'active') === 'active'
                   ? 'bg-green-100 text-green-800'
                   : 'bg-red-100 text-red-800'
-              }`}>
-                {canteen.status}
-              </span>
-            </div>
+                  }`}>
+                  {canteen.status || 'active'}
+                </span>
+              </div>
 
-            <div className="mb-4">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Manager:</span> {canteen.manager}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                Created: {canteen.createdAt}
-              </p>
-            </div>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">Email:</span> {canteen.manager || 'No email'}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Created: {canteen.createdAt || 'Unknown'}
+                </p>
+              </div>
 
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => handleEditCanteen(canteen)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handleDeleteCanteen(canteen)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => handleEditCanteen(canteen)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteCanteen(canteen)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {filteredCanteens.length === 0 && (
+      {!isLoading && filteredCanteens.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No canteens found matching your search.</p>
+          <p className="text-gray-500">
+            {searchTerm ? 'No canteens found matching your search.' : 'No canteens available. Add your first canteen to get started.'}
+          </p>
         </div>
       )}
 
