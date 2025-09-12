@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Search, Edit2, Trash2, Eye } from 'lucide-react';
 import { User, mockUsers } from '../data/mockData';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { getAllUsers } from '../api/adminApi/admin';
 
 const Users: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  // const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -22,7 +25,50 @@ const Users: React.FC = () => {
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    start: "0",
+    limit: "10",
+    search: "",
+  });
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await getAllUsers({
+          start: pagination.start,
+          limit: pagination.limit,
+          search: pagination.search,
+          // Add other parameters as needed
+        });
+
+        if (response && response.data && Array.isArray(response.data)) {
+          setUsers(response.data);
+        } else if (Array.isArray(response)) {
+          setUsers(response);
+        } else {
+          console.error("Unexpected API response structure:", response);
+          setError("Unexpected response format from server");
+        }
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+        setError("Failed to load users. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [pagination.start, pagination.limit, pagination.search]); // Re-run when pagination changes
+
+  // Function to handle pagination changes
+  const handlePageChange = (newStart: string) => {
+    setPagination(prev => ({ ...prev, start: newStart }));
+  };
   const resetForm = () => {
     setFormData({
       name: '',
@@ -58,8 +104,8 @@ const Users: React.FC = () => {
   const handleUpdateUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedUser) {
-      setUsers(users.map(user => 
-        user.id === selectedUser.id 
+      setUsers(users.map(user =>
+        user.id === selectedUser.id
           ? { ...user, ...formData }
           : user
       ));
@@ -142,11 +188,10 @@ const Users: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                      user.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${user.status === 'active'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                      }`}>
                       {user.status}
                     </span>
                   </td>

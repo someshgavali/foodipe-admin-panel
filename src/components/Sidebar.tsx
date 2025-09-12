@@ -1,12 +1,12 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Building2, 
-  Folder, 
-  FolderOpen, 
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  Folder,
+  FolderOpen,
   UtensilsCrossed,
   LogOut,
   ChevronRight
@@ -18,7 +18,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -26,14 +26,44 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     navigate('/login');
   };
 
-  const menuItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/dashboard/users', icon: Users, label: 'Users' },
-    { path: '/dashboard/canteens', icon: Building2, label: 'Canteens' },
-    { path: '/dashboard/categories', icon: Folder, label: 'Categories' },
-    { path: '/dashboard/subcategories', icon: FolderOpen, label: 'Subcategories' },
-    { path: '/dashboard/menu-items', icon: UtensilsCrossed, label: 'Menu Items' },
+  // Derive roles from user's role name; super admin shortcut
+  // const roleName = (user?.role?.name || '').toLowerCase();
+  // const userRoles = roleName ? [roleName] : [];
+  // if (isSuperAdmin() && !userRoles.includes('superadmin')) userRoles.push('superadmin');
+  const userIsSuperAdmin = isSuperAdmin();
+
+
+  // const baseItems = [
+  //   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', visible: true, roles: ['admin', 'manager', 'user'] },
+  //   { path: '/dashboard/users', icon: Users, label: 'Users', visible: hasPermission('UserService', '/user/getAllUsers', 'GET'), roles: ['admin'] },
+  //   { path: '/dashboard/company', icon: Users, label: 'Companies', visible: isSuperAdmin(), roles: ['superadmin'] },
+  //   { path: '/dashboard/canteens', icon: Building2, label: 'Canteens', visible: hasPermission('CanteenService'), roles: ['admin', 'manager'] },
+  //   { path: '/dashboard/categories', icon: Folder, label: 'Categories', visible: hasPermission('CategoryService'), roles: ['admin', 'manager'] },
+  //   { path: '/dashboard/subcategories', icon: FolderOpen, label: 'Subcategories', visible: hasPermission('CategoryService'), roles: ['admin', 'manager'] },
+  //   { path: '/dashboard/menu-items', icon: UtensilsCrossed, label: 'Menu Items', visible: hasPermission('MenuService'), roles: ['admin', 'manager', 'user'] },
+  // ];
+
+  // // Show item if visible and user has at least one required role
+  // // Super Admin bypasses role checks and sees all visible items
+  // const menuItems = baseItems.filter(item => {
+  //   const rolesOk = isSuperAdmin() || !item.roles || item.roles.some(role => userRoles.includes(role));
+  //   return item.visible && rolesOk;
+  // });
+  const baseItems = [
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', visible: true },
+    { path: '/dashboard/users', icon: Users, label: 'Users', visible: hasPermission('UserService', '/user/getAllUsers', 'GET') },
+    { path: '/dashboard/company', icon: Users, label: 'Companies', visible: userIsSuperAdmin },
+    { path: '/dashboard/canteens', icon: Building2, label: 'Canteens', visible: hasPermission('CanteenService') },
+    { path: '/dashboard/categories', icon: Folder, label: 'Categories', visible: hasPermission('CategoryService') },
+    { path: '/dashboard/subcategories', icon: FolderOpen, label: 'Subcategories', visible: hasPermission('CategoryService') },
+    { path: '/dashboard/menu-items', icon: UtensilsCrossed, label: 'Menu Items', visible: hasPermission('MenuService') },
   ];
+
+  // Filter menu items based on visibility
+  const menuItems = baseItems.filter(item => item.visible);
+
+
+
 
   return (
     <>
@@ -77,8 +107,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   onClick={() => setIsOpen(false)}
                   className={({ isActive }) => `
                     flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group
-                    ${isActive 
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                    ${isActive
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
@@ -112,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 </div>
               </div>
             </div>
-            
+
             <button
               onClick={handleLogout}
               className="w-full flex items-center space-x-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

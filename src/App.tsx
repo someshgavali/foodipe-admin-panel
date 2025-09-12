@@ -11,6 +11,7 @@ import Canteens from './pages/Canteens';
 import Categories from './pages/Categories';
 import Subcategories from './pages/Subcategories';
 import MenuItems from './pages/MenuItems';
+import Company from './pages/Company';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="users" element={<Users />} />
+            <Route path='company' element={<Company />} />
             <Route path="canteens" element={<Canteens />} />
             <Route path="categories" element={<Categories />} />
             <Route path="subcategories" element={<Subcategories />} />

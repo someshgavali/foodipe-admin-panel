@@ -1,19 +1,45 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Users, Building2, Folder, UtensilsCrossed, TrendingUp, DollarSign, ShoppingCart, Star } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { getCompanies } from '../api/adminApi/company';
 
 const Dashboard: React.FC = () => {
-  const stats = [
+  const { isSuperAdmin } = useAuth();
+  const [companyCount, setCompanyCount] = useState<number | null>(null);
+  const [employeeCount, setEmployeeCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadCounts = async () => {
+      if (!isSuperAdmin()) return;
+      try {
+        const res = await getCompanies({ start: "0", limit: "1000", search: "" });
+        const companies = (res as any).data || [];
+        const totalCompanies = Array.isArray(companies) ? companies.length : 0;
+        const totalEmployees = Array.isArray(companies)
+          ? companies.reduce((sum: number, c: any) => sum + (parseInt(c.no_of_employee || '0', 10) || 0), 0)
+          : 0;
+        setCompanyCount(totalCompanies);
+        setEmployeeCount(totalEmployees);
+      } catch (e) {
+        setCompanyCount(0);
+        setEmployeeCount(0);
+      }
+    };
+    loadCounts();
+  }, [isSuperAdmin]);
+
+  const stats = useMemo(() => [
     {
       title: 'Total Users',
-      value: '2,847',
+      value: isSuperAdmin() && employeeCount !== null ? String(employeeCount) : '2,847',
       change: '+12.5%',
       changeType: 'increase' as const,
       icon: Users,
       color: 'blue'
     },
     {
-      title: 'Active Canteens',
-      value: '24',
+      title: isSuperAdmin() ? 'Total Companies' : 'Active Canteens',
+      value: isSuperAdmin() && companyCount !== null ? String(companyCount) : '24',
       change: '+2',
       changeType: 'increase' as const,
       icon: Building2,
@@ -35,7 +61,7 @@ const Dashboard: React.FC = () => {
       icon: DollarSign,
       color: 'amber'
     }
-  ];
+  ], [companyCount, employeeCount, isSuperAdmin]);
 
   const recentActivities = [
     { id: 1, action: 'New user registered', user: 'John Smith', time: '2 minutes ago' },
@@ -76,16 +102,15 @@ const Dashboard: React.FC = () => {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           const colors = getColorClasses(stat.color).split(' ');
-          
+
           return (
             <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-12 h-12 ${colors[2]} rounded-lg flex items-center justify-center`}>
                   <Icon className={`w-6 h-6 ${colors[1]}`} />
                 </div>
-                <span className={`text-sm font-medium px-2 py-1 rounded-full ${
-                  stat.changeType === 'increase' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'
-                }`}>
+                <span className={`text-sm font-medium px-2 py-1 rounded-full ${stat.changeType === 'increase' ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'
+                  }`}>
                   {stat.change}
                 </span>
               </div>
