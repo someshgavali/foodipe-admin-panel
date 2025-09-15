@@ -97,7 +97,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-4">
+            <p className="px-4 pb-2 text-xs font-semibold tracking-wider text-gray-400 uppercase">Navigation</p>
+            <div className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -106,29 +108,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   to={item.path}
                   onClick={() => setIsOpen(false)}
                   className={({ isActive }) => `
-                    flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group
+                    group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
                     ${isActive
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
                     }
                   `}
                 >
                   {({ isActive }) => (
                     <>
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700'}`} />
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive ? 'border-white/30 bg-white/10 text-white' : 'border-gray-200 bg-white text-gray-600 group-hover:border-gray-300'}`}>
+                        <Icon className="w-4 h-4" />
+                      </span>
                       <span className="font-medium">{item.label}</span>
-                      {isActive && (
-                        <ChevronRight className="w-4 h-4 ml-auto text-blue-600" />
-                      )}
+                      <ChevronRight className={`w-4 h-4 ml-auto ${isActive ? 'text-white' : 'text-gray-300 group-hover:text-gray-400'}`} />
                     </>
                   )}
                 </NavLink>
               );
             })}
+            </div>
           </nav>
 
-          {/* User info and logout */}
-          <div className="p-4 border-t border-gray-200">
+          {/* User info and logout - pinned to bottom */}
+          <div className="mt-auto p-4 border-t border-gray-200">
             <div className="mb-4">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
@@ -145,9 +148,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
             >
-              <LogOut className="w-5 h-5" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-white text-red-600">
+                <LogOut className="w-4 h-4" />
+              </span>
               <span className="font-medium">Logout</span>
             </button>
           </div>

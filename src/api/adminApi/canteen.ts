@@ -55,3 +55,11 @@ export const getAllCanteensWithQuery = async (params: CanteenParams = {}) => {
         throw error;
     }
 };
+
+
+const createCanteen = async (canteenData: any) => {
+    const response = await axiosInstance.post('/canteen/createCanteen', canteenData);
+    return response.data;
+}
+
+export { createCanteen };
