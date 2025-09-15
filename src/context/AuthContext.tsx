@@ -115,12 +115,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const hasPermission = (serviceName: string, api?: string, method?: string) => {
     if (!user?.role?.permissions) return false;
     if (isSuperAdmin()) return true;
-    const service = user.role.permissions.find(p => p.serviceName === serviceName);
+
+    const normalize = (value: string | undefined | null) =>
+      (value || '').toLowerCase().replace(/\s+/g, '');
+
+    const matchApiPath = (pattern: string, path: string) => {
+      // Support colon params in pattern like /resource/:id matching /resource/123
+      const patternParts = pattern.split('/').filter(Boolean);
+      const pathParts = path.split('/').filter(Boolean);
+      if (patternParts.length !== pathParts.length) return false;
+      return patternParts.every((part, idx) => part.startsWith(':') || part === pathParts[idx]);
+    };
+
+    const normalizedTargetService = normalize(serviceName);
+    const service = user.role.permissions.find(
+      p => normalize(p.serviceName) === normalizedTargetService
+    );
     if (!service) return false;
     if (!api && !method) return true;
     const apiPerms = service.api_permissions || [];
     return apiPerms.some(p => {
-      const apiMatch = api ? p.api === api : true;
+      const apiMatch = api ? (p.api === api || matchApiPath(p.api, api)) : true;
       const methodMatch = method ? (p.methods || []).includes(method) : true;
       return p.allowed && apiMatch && methodMatch;
     });

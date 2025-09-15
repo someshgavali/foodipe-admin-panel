@@ -8,7 +8,6 @@ interface CanteenParams {
 
 export const getAllCanteens = async (params: CanteenParams = {}) => {
     try {
-        console.log("Making API call to:", `${axiosInstance.baseURL}/canteen/getAllCanteens`);
         console.log("With params:", params);
 
         const response = await axiosInstance.get('/canteen/getAllCanteens');
@@ -62,4 +61,38 @@ const createCanteen = async (canteenData: any) => {
     return response.data;
 }
 
-export { createCanteen };
+const getCategoryByCanteen = async (canteenId:any) => {
+    const response = await axiosInstance.get(`/category/getCategoryByCanteen/${canteenId}`);
+    return response.data;
+}
+
+
+// Subcategories by user
+export const getCategoriesByCanteenId = async (canteenId: string) => {
+    const response = await axiosInstance.get(`canteenCategories/getCategoriesByCanteen/${canteenId}`);
+    return response.data;
+}
+
+
+export const getSubcategoriesByUserId = async (userId: string) => {
+    const response = await axiosInstance.get(`/canteenSubCategories/getSubCategoriesByCanteen/${userId}`);
+    return response.data;
+}
+
+export const createcategory = async (payload: any) => {
+    const response = await axiosInstance.post("/canteenCategories/createCategoriesItem",payload);
+    return response.data;
+}
+
+// export const updateCategoryById = async (categoryId, payload) => {
+//     const response = await axiosInstance.post(
+//         `/canteenCategories/createCategoriesItem/${categoryId}`,
+//         payload
+//     );
+//     return response.data;
+// };
+
+
+
+
+export { createCanteen ,getCategoryByCanteen};
