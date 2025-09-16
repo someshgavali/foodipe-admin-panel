@@ -25,10 +25,16 @@ interface CompanyResponse {
 
 export const getCompanies = async (params: CompanyParams = {}): Promise<CompanyResponse> => {
     try {
+<<<<<<< HEAD
         console.log("Making API call to getCompanies with params:", params);
         const query = new URLSearchParams(params as Record<string, string>).toString();
         const endpoint = `/company/getAllCompanies${query ? `?${query}` : ''}`;
         const response = await axiosInstance.get(endpoint);
+=======
+        const response = await axiosInstance.get('/company/getAllCompanies', {
+            params: params
+        });
+>>>>>>> a693969ec06d0e8f38925f55b13adf74d67692b5
         console.log("Companies API Response:", response);
         return response.data;
     } catch (error) {
@@ -77,7 +83,6 @@ interface RoleResponse {
 
 export const getAllRoles = async (params: RoleParams = {}): Promise<RoleResponse> => {
     try {
-        console.log("Making API call to getAllRoles with params:", params);
         const response = await axiosInstance.post('/role/getAllRoles', {
             params: params
         });
