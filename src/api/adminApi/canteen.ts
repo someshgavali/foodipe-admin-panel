@@ -61,7 +61,7 @@ const createCanteen = async (canteenData: any) => {
     return response.data;
 }
 
-const getCategoryByCanteen = async (canteenId:any) => {
+const getCategoryByCanteen = async (canteenId: any) => {
     const response = await axiosInstance.get(`/category/getCategoryByCanteen/${canteenId}`);
     return response.data;
 }
@@ -80,7 +80,7 @@ export const getSubcategoriesByUserId = async (userId: string) => {
 }
 
 export const createcategory = async (payload: any) => {
-    const response = await axiosInstance.post("/canteenCategories/createCategoriesItem",payload);
+    const response = await axiosInstance.post("/canteenCategories/createCategoriesItem", payload);
     return response.data;
 }
 
@@ -92,7 +92,59 @@ export const createcategory = async (payload: any) => {
 //     return response.data;
 // };
 
+export interface Canteen {
+    id: number;
+    name: string;
+    location?: string;
+    // add more fields from your backend response
+}
+
+export const getCanteensByCompanyId = async (companyId: number): Promise<Canteen[]> => {
+    try {
+        const storedAdmin = localStorage.getItem("admin_user");
+        const token = storedAdmin ? JSON.parse(storedAdmin).token : null;
+
+        const response = await axiosInstance.get(
+            `/canteen/getCanteenByCompanyId/${companyId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching canteens by company ID:", error);
+        throw error;
+    }
+};
 
 
 
-export { createCanteen ,getCategoryByCanteen};
+interface UpdateCanteenPayload {
+    canteen_name?: string;
+    email?: string;
+    password?: string;
+    address?: string;
+    slug?: string;
+    // For any extra optional fields
+}
+
+export const updateCanteen = async (
+    id: string,
+    payload: UpdateCanteenPayload
+) => {
+    try {
+        const response = await axiosInstance.put(
+            `/canteen/updateCanteen/${id}`,
+            payload
+        );
+        return response.data;
+    } catch (error: any) {
+        console.error('Error updating canteen:', error.response || error.message);
+        throw error;
+    }
+};
+
+export { createCanteen, getCategoryByCanteen };

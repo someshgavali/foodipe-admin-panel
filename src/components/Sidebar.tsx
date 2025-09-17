@@ -27,18 +27,72 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   };
 
   const userIsSuperAdmin = isSuperAdmin();
+  const userIsCompanyAdmin = user?.role?.name === 'CompanyAdmin';
 
   const baseItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', visible: true },
-    // Keep superadmin-only items intact
-    { path: '/dashboard/users', icon: Users, label: 'Users', visible: hasPermission('UserService', '/user/getAllUsers', 'GET') || userIsSuperAdmin },
-    { path: '/dashboard/company', icon: Users, label: 'Companies', visible: userIsSuperAdmin },
-    // Canteen-scoped items based on Canteen Service permissions
-    { path: '/dashboard/canteens', icon: Building2, label: 'Canteens', visible: userIsSuperAdmin },
-    { path: '/dashboard/categories', icon: Folder, label: 'Categories', visible: hasPermission('Canteen Service', '/canteenCategories/getCanteensCategories', 'GET') },
-    { path: '/dashboard/subcategories', icon: FolderOpen, label: 'Subcategories', visible: hasPermission('Canteen Service', '/canteenSubCategories/getSubCanteensCategories', 'GET') },
-    { path: '/dashboard/menu-items', icon: UtensilsCrossed, label: 'Menu Items', visible: hasPermission('Canteen Service') },
+
+    // Users - visible to SuperAdmin OR CompanyAdmin with user permissions
+    {
+      path: '/dashboard/users',
+      icon: Users,
+      label: 'Users',
+      visible: userIsSuperAdmin ||
+        (userIsCompanyAdmin && hasPermission('Company Service', '/user/getAllUsers', 'GET'))
+    },
+
+    // Companies - visible only to SuperAdmin
+    {
+      path: '/dashboard/company',
+      icon: Users,
+      label: 'Companies',
+      visible: userIsSuperAdmin
+    },
+
+    // Canteens - visible to SuperAdmin OR CompanyAdmin with canteen permissions
+    {
+      path: '/dashboard/canteens',
+      icon: Building2,
+      label: 'Canteens',
+      visible: userIsSuperAdmin ||
+        (userIsCompanyAdmin && hasPermission('Company Service', '/canteen/getAllCanteens', 'GET'))
+    },
+
+    // Categories - visible to users with appropriate permissions
+    {
+      path: '/dashboard/categories',
+      icon: Folder,
+      label: 'Categories',
+      visible: hasPermission('/canteenCategories/getCanteensCategories', 'GET')
+    },
+
+    // Subcategories - visible to users with appropriate permissions
+    {
+      path: '/dashboard/subcategories',
+      icon: FolderOpen,
+      label: 'Subcategories',
+      visible: hasPermission('/canteenSubCategories/getSubCanteensCategories', 'GET')
+    },
+
+    // Menu Items - visible to users with appropriate permissions
+    {
+      path: '/dashboard/menu-items',
+      icon: UtensilsCrossed,
+      label: 'Menu Items',
+      visible: hasPermission()
+    },
   ];
+  // const baseItems = [
+  //   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', visible: true },
+  //   // Keep superadmin-only items intact
+  //   { path: '/dashboard/users', icon: Users, label: 'Users', visible: hasPermission('UserService', '/user/getAllUsers', 'GET') || userIsSuperAdmin },
+  //   { path: '/dashboard/company', icon: Users, label: 'Companies', visible: userIsSuperAdmin },
+  //   // Canteen-scoped items based on Canteen Service permissions
+  //   { path: '/dashboard/canteens', icon: Building2, label: 'Canteens', visible: userIsSuperAdmin },
+  //   { path: '/dashboard/categories', icon: Folder, label: 'Categories', visible: hasPermission('Canteen Service', '/canteenCategories/getCanteensCategories', 'GET') },
+  //   { path: '/dashboard/subcategories', icon: FolderOpen, label: 'Subcategories', visible: hasPermission('Canteen Service', '/canteenSubCategories/getSubCanteensCategories', 'GET') },
+  //   { path: '/dashboard/menu-items', icon: UtensilsCrossed, label: 'Menu Items', visible: hasPermission('Canteen Service') },
+  // ];
 
   // Filter menu items based on visibility
   const menuItems = baseItems.filter(item => item.visible);
@@ -95,19 +149,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
-                        isActive 
-                          ? 'border-white/30 bg-white/10 text-white' 
-                          : 'border-gray-200 bg-white text-gray-600 group-hover:border-gray-300'
-                      }`}>
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${isActive
+                        ? 'border-white/30 bg-white/10 text-white'
+                        : 'border-gray-200 bg-white text-gray-600 group-hover:border-gray-300'
+                        }`}>
                         <Icon className="w-4 h-4" />
                       </span>
                       <span className="font-medium">{item.label}</span>
-                      <ChevronRight className={`w-4 h-4 ml-auto ${
-                        isActive 
-                          ? 'text-white' 
-                          : 'text-gray-300 group-hover:text-gray-400'
-                      }`} />
+                      <ChevronRight className={`w-4 h-4 ml-auto ${isActive
+                        ? 'text-white'
+                        : 'text-gray-300 group-hover:text-gray-400'
+                        }`} />
                     </>
                   )}
                 </NavLink>

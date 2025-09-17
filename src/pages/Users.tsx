@@ -4,27 +4,50 @@ import { User, mockUsers } from '../data/mockData';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { getAllUsers } from '../api/adminApi/admin';
+import { createUser, getAllUsersByCompanyId, updateUserProfile } from '../api/adminApi/user';
 
 const Users: React.FC = () => {
   // const [users, setUsers] = useState<User[]>(mockUsers);
   const [users, setUsers] = useState<User[]>([]);
-
+  const [message, setMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  // const [formData, setFormData] = useState({
+  //   name: '',
+  //   email: '',
+  //   role: 'Customer',
+  //   status: 'active' as 'active' | 'inactive'
+  // });
+  // const [formData, setFormData] = useState({
+  //   name: "",
+  //   email: "",
+  //   phonenumber: "",
+  //   empid: "",
+  //   address: "",
+  //   walletBalance: "",
+  //   company_name: "" // read-only, coming from Company
+  // });
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: 'Customer',
-    status: 'active' as 'active' | 'inactive'
+    name: "",
+    email: "",
+    password: "",
+    phonenumber: "",
+    empid: "",
+    companyid: "",
+    address: "",
   });
 
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (user?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (user?.email?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
+  // const filteredUsers = users.filter(user =>
+  //   user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
@@ -33,37 +56,100 @@ const Users: React.FC = () => {
     search: "",
   });
 
+
+
+
   useEffect(() => {
     const fetchUsers = async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
-        const response = await getAllUsers({
-          start: pagination.start,
-          limit: pagination.limit,
-          search: pagination.search,
-          // Add other parameters as needed
-        });
-
-        if (response && response.data && Array.isArray(response.data)) {
-          setUsers(response.data);
-        } else if (Array.isArray(response)) {
-          setUsers(response);
-        } else {
-          console.error("Unexpected API response structure:", response);
-          setError("Unexpected response format from server");
-        }
-      } catch (err) {
-        console.error("Failed to fetch users:", err);
-        setError("Failed to load users. Please try again.");
+        setIsLoading(true);
+        const data = await getAllUsersByCompanyId();
+        setUsers(data); // assuming API returns an array of users
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch users");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUsers();
-  }, [pagination.start, pagination.limit, pagination.search]); // Re-run when pagination changes
+  }, []);
+
+
+
+  // 3. Handle edit button click
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setFormData({
+      name: user.name,
+      email: user.email,
+      phonenumber: user.phonenumber,
+      empid: user.empid,
+      address: user.address,
+      walletBalance: user.walletBalance,
+      company_name: user.Company.company_name
+    });
+    setIsEditModalOpen(true);
+  };
+
+  // 4. Handle update (later we’ll plug in API)
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedUser) {
+      try {
+        await updateUserProfile(selectedUser.userId, {
+          name: formData.name,
+          phonenumber: formData.phonenumber,
+          address: formData.address,
+        });
+
+        // update state locally so UI refreshes without reload
+        setUsers(users.map(u =>
+          u.userId === selectedUser.userId
+            ? { ...u, ...formData }
+            : u
+        ));
+
+        setIsEditModalOpen(false);
+        setSelectedUser(null);
+      } catch (err) {
+        console.error("Update failed:", err);
+      }
+    }
+  };
+
+
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     setIsLoading(true);
+  //     setError(null);
+
+  //     try {
+  //       const response = await getAllUsers({
+  //         start: pagination.start,
+  //         limit: pagination.limit,
+  //         search: pagination.search,
+  //         // Add other parameters as needed
+  //       });
+
+  //       if (response && response.data && Array.isArray(response.data)) {
+  //         setUsers(response.data);
+  //       } else if (Array.isArray(response)) {
+  //         setUsers(response);
+  //       } else {
+  //         console.error("Unexpected API response structure:", response);
+  //         setError("Unexpected response format from server");
+  //       }
+  //     } catch (err) {
+  //       console.error("Failed to fetch users:", err);
+  //       setError("Failed to load users. Please try again.");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchUsers();
+  // }, [pagination.start, pagination.limit, pagination.search]); // Re-run when pagination changes
 
   // Function to handle pagination changes
   const handlePageChange = (newStart: string) => {
@@ -78,40 +164,36 @@ const Users: React.FC = () => {
     });
   };
 
-  const handleAddUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newUser: User = {
-      id: Date.now().toString(),
-      ...formData,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    setUsers([...users, newUser]);
-    setIsAddModalOpen(false);
-    resetForm();
+  // const handleAddUser = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const newUser: User = {
+  //     id: Date.now().toString(),
+  //     ...formData,
+  //     createdAt: new Date().toISOString().split('T')[0]
+  //   };
+  //   setUsers([...users, newUser]);
+  //   setIsAddModalOpen(false);
+  //   resetForm();
+  // };
+
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user);
-    setFormData({
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      status: user.status
-    });
-    setIsEditModalOpen(true);
-  };
-
-  const handleUpdateUser = (e: React.FormEvent) => {
+  // submit form and call API
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedUser) {
-      setUsers(users.map(user =>
-        user.id === selectedUser.id
-          ? { ...user, ...formData }
-          : user
-      ));
-      setIsEditModalOpen(false);
-      resetForm();
-      setSelectedUser(null);
+    try {
+      const response = await createUser(formData);
+      setMessage("✅ User created successfully!");
+      console.log("Created user:", response);
+    } catch (err) {
+      setMessage("❌ Failed to create user");
+      console.error(err);
     }
   };
 
@@ -220,6 +302,7 @@ const Users: React.FC = () => {
       </div>
 
       {/* Add User Modal */}
+      {/* Add User Modal */}
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => {
@@ -228,7 +311,21 @@ const Users: React.FC = () => {
         }}
         title="Add New User"
       >
-        <form onSubmit={handleAddUser} className="space-y-4">
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              const newUser = await createUser(formData); // call API
+              setUsers([...users, newUser]); // update UI
+              setIsAddModalOpen(false);
+              resetForm();
+            } catch (err) {
+              console.error("Failed to add user:", err);
+            }
+          }}
+          className="space-y-4"
+        >
+          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
             <input
@@ -236,9 +333,11 @@ const Users: React.FC = () => {
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
             <input
@@ -246,32 +345,71 @@ const Users: React.FC = () => {
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="Customer">Customer</option>
-              <option value="Manager">Manager</option>
-              <option value="Admin">Admin</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <input
+              type="password"
+              required
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
           </div>
+
+          {/* Phone Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+            <input
+              type="text"
+              required
+              value={formData.phonenumber}
+              onChange={(e) => setFormData({ ...formData, phonenumber: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
           </div>
+
+          {/* Employee ID */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
+            <input
+              type="text"
+              required
+              value={formData.empid}
+              onChange={(e) => setFormData({ ...formData, empid: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Company ID */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Company ID</label>
+            <input
+              type="text"
+              required
+              value={formData.companyid}
+              onChange={(e) => setFormData({ ...formData, companyid: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+            <input
+              type="text"
+              required
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Buttons */}
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
@@ -293,12 +431,12 @@ const Users: React.FC = () => {
         </form>
       </Modal>
 
+
       {/* Edit User Modal */}
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);
-          resetForm();
           setSelectedUser(null);
         }}
         title="Edit User"
@@ -308,66 +446,87 @@ const Users: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
             <input
               type="text"
-              required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
             <input
               type="email"
-              required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border rounded-lg  cursor-not-allowed"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="Customer">Customer</option>
-              <option value="Manager">Manager</option>
-              <option value="Admin">Admin</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+            <input
+              type="text"
+              value={formData.phonenumber}
+              onChange={(e) => setFormData({ ...formData, phonenumber: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+            />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
+            <input
+              type="text"
+              value={formData.empid}
+              onChange={(e) => setFormData({ ...formData, empid: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg  cursor-not-allowed"
+            />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+            <input
+              type="text"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Wallet Balance</label>
+            <input
+              type="text"
+              value={formData.walletBalance}
+              onChange={(e) => setFormData({ ...formData, walletBalance: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg  cursor-not-allowed"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+            <input
+              type="text"
+              value={formData.company_name}
+              readOnly
+              className="w-full px-3 py-2 border rounded-lg bg-gray-100  cursor-not-allowed"
+            />
+          </div>
+
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
               onClick={() => {
                 setIsEditModalOpen(false);
-                resetForm();
                 setSelectedUser(null);
               }}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
               Update User
             </button>
           </div>
         </form>
       </Modal>
+
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

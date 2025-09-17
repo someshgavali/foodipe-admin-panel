@@ -8,6 +8,8 @@ import {
   getAllCanteensAlternative,
   getAllCanteensWithQuery,
   createCanteen,
+  getCanteensByCompanyId,
+  updateCanteen,
 } from "../api/adminApi/canteen";
 import { toast } from "react-toastify";
 
@@ -50,153 +52,152 @@ const CanteenForm: React.FC<{
   setSelectedCanteen,
   isSubmitting = false,
 }) => (
-  <form onSubmit={onSubmit} className="space-y-4">
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Canteen Name
-      </label>
-      <input
-        type="text"
-        required
-        value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Enter canteen name"
-      />
-    </div>
-
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Location
-      </label>
-      <input
-        type="text"
-        required
-        value={formData.location}
-        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Enter location"
-      />
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Manager Email
-        </label>
-        <input
-          type="email"
-          required
-          value={formData.manager}
-          onChange={(e) =>
-            setFormData({ ...formData, manager: e.target.value })
-          }
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="manager@company.com"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Phone Number
-        </label>
-        <input
-          type="tel"
-          required
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="+1-234-567-8900"
-        />
-      </div>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Password
-        </label>
-        <input
-          type="password"
-          required
-          value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter password"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Slug
+          Canteen Name
         </label>
         <input
           type="text"
           required
-          value={formData.slug}
-          onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="canteen-slug"
+          placeholder="Enter canteen name"
         />
       </div>
-    </div>
 
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Status
-      </label>
-      <select
-        value={formData.status}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            status: e.target.value as "active" | "inactive",
-          })
-        }
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      >
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
-    </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Location
+        </label>
+        <input
+          type="text"
+          required
+          value={formData.location}
+          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter location"
+        />
+      </div>
 
-    <div className="flex justify-end space-x-3 pt-4">
-      <button
-        type="button"
-        onClick={() => {
-          if (isEdit) {
-            setIsEditModalOpen(false);
-          } else {
-            setIsAddModalOpen(false);
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Manager Email
+          </label>
+          <input
+            type="email"
+            required
+            value={formData.manager}
+            onChange={(e) =>
+              setFormData({ ...formData, manager: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="manager@company.com"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Phone Number
+          </label>
+          <input
+            type="tel"
+            required
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="+1-234-567-8900"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Password
+          </label>
+          <input
+            type="password"
+            required={!isEdit}
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter password"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Slug
+          </label>
+          <input
+            type="text"
+            required
+            value={formData.slug}
+            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="canteen-slug"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Status
+        </label>
+        <select
+          value={formData.status}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              status: e.target.value as "active" | "inactive",
+            })
           }
-          resetForm();
-          setSelectedCanteen(null);
-        }}
-        className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-      >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`px-4 py-2 rounded-lg transition-colors ${
-          isSubmitting
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div className="flex justify-end space-x-3 pt-4">
+        <button
+          type="button"
+          onClick={() => {
+            if (isEdit) {
+              setIsEditModalOpen(false);
+            } else {
+              setIsAddModalOpen(false);
+            }
+            resetForm();
+            setSelectedCanteen(null);
+          }}
+          className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`px-4 py-2 rounded-lg transition-colors ${isSubmitting
             ? "bg-gray-400 text-gray-200 cursor-not-allowed"
             : "bg-blue-600 text-white hover:bg-blue-700"
-        }`}
-      >
-        {isSubmitting ? (
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span>{isEdit ? "Updating..." : "Creating..."}</span>
-          </div>
-        ) : (
-          `${isEdit ? "Update" : "Add"} Canteen`
-        )}
-      </button>
-    </div>
-  </form>
-);
+            }`}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>{isEdit ? "Updating..." : "Creating..."}</span>
+            </div>
+          ) : (
+            `${isEdit ? "Update" : "Add"} Canteen`
+          )}
+        </button>
+      </div>
+    </form>
+  );
 
 const Canteens: React.FC = () => {
   const [canteens, setCanteens] = useState<Canteen[]>([]);
@@ -207,6 +208,9 @@ const Canteens: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCanteen, setSelectedCanteen] = useState<Canteen | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     location: "",
@@ -218,17 +222,41 @@ const Canteens: React.FC = () => {
   });
 
   // Helper function to map API response to component format
+  // const mapApiCanteenToComponent = (apiCanteen: any) => ({
+  //   id: apiCanteen.canteenid?.toString() || Date.now().toString(),
+  //   name: apiCanteen.canteen_name || "Unnamed Canteen",
+  //   location: apiCanteen.address || "No location",
+  //   manager: apiCanteen.email || "No manager",
+  //   phone: "No phone", // API doesn't have phone field
+  //   status: "active" as "active" | "inactive", // Default to active
+  //   createdAt: apiCanteen.createddate
+  //     ? new Date(apiCanteen.createddate).toISOString().split("T")[0]
+  //     : "Unknown",
+  // });
+  // const mapApiCanteenToComponent = (apiCanteen: any) => ({
+  //   id: apiCanteen.id,
+  //   name: apiCanteen.canteen_name, // adjust field names if API response differs
+  //   location: apiCanteen.address,
+  //   createdAt: apiCanteen.createddate,
+  //   manager: apiCanteen.email,
+  //   slug
+  //     : apiCanteen.slug,
+  // });
   const mapApiCanteenToComponent = (apiCanteen: any) => ({
-    id: apiCanteen.canteenid?.toString() || Date.now().toString(),
+    id: apiCanteen.canteenid ? String(apiCanteen.canteenid) : Date.now().toString(),
     name: apiCanteen.canteen_name || "Unnamed Canteen",
     location: apiCanteen.address || "No location",
-    manager: apiCanteen.email || "No manager",
-    phone: "No phone", // API doesn't have phone field
-    status: "active" as "active" | "inactive", // Default to active
+    manager: apiCanteen.email || "No email",
+    slug: apiCanteen.slug || "",
+    status: "active" as "active" | "inactive",
     createdAt: apiCanteen.createddate
       ? new Date(apiCanteen.createddate).toISOString().split("T")[0]
       : "Unknown",
+    phone: apiCanteen.phone || "",
   });
+
+
+
 
   const filteredCanteens = canteens.filter((canteen) => {
     // First check if canteen has required properties
@@ -257,7 +285,6 @@ const Canteens: React.FC = () => {
       status: "active",
     });
   };
-
   const handleAddCanteen = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -269,20 +296,17 @@ const Canteens: React.FC = () => {
         password: formData.password,
         address: formData.location,
         slug: formData.slug,
+        companyid: JSON.parse(localStorage.getItem("admin_user") || "{}").id,
         roleid: "4",
       };
-      const response = await createCanteen(payload);
-      const newCanteen: Canteen = {
-        id: response.canteenid?.toString() || Date.now().toString(),
-        name: formData.name,
-        location: formData.location,
-        manager: formData.manager,
-        phone: formData.phone,
-        status: formData.status,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
 
+      const response = await createCanteen(payload);
+
+
+      const newCanteen: Canteen = mapApiCanteenToComponent(response);
       setCanteens([...canteens, newCanteen]);
+
+
       setIsAddModalOpen(false);
       resetForm();
 
@@ -295,35 +319,180 @@ const Canteens: React.FC = () => {
     }
   };
 
+  // const handleAddCanteen = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     const payload = {
+  //       canteen_name: formData.name,
+  //       email: formData.manager,
+  //       password: formData.password,
+  //       address: formData.location,
+  //       slug: formData.slug,
+  //       companyid: JSON.parse(localStorage.getItem("admin_user") || "{}").id,
+  //       roleid: "4",
+  //     };
+  //     const response = await createCanteen(payload);
+  //     const newCanteen: Canteen = {
+  //       id: response.canteenid?.toString() || Date.now().toString(),
+  //       name: formData.name,
+  //       location: formData.location,
+  //       manager: formData.manager,
+  //       phone: formData.phone,
+  //       status: formData.status,
+  //       createdAt: new Date().toISOString().split("T")[0],
+  //     };
+
+  //     setCanteens([...canteens, newCanteen]);
+  //     setIsAddModalOpen(false);
+  //     resetForm();
+
+  //     toast.success("Canteen created successfully!");
+  //   } catch (error) {
+  //     console.error("Error creating canteen:", error);
+  //     toast.error("Failed to create canteen. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     [e.target.name]: e.target.value,
+  //   }));
+  // };
+
+
+  useEffect(() => {
+    if (selectedCanteen) {
+      setFormData({
+        canteen_name: selectedCanteen.canteen_name,
+        email: selectedCanteen.email,
+        password: selectedCanteen.password,
+        slug: selectedCanteen.slug,
+        address: selectedCanteen.address,
+        roleid: selectedCanteen.roleid,
+      });
+    }
+  }, [selectedCanteen]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+
+  const handleUpdateCanteen = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCanteen) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Create payload without password if it's empty
+      const payload: any = {
+        canteen_name: formData.name,
+        email: formData.manager,
+        address: formData.location,
+        slug: formData.slug,
+        roleid: "4",
+        phone: formData.phone,
+      };
+
+      // Only include password if it's provided
+      if (formData.password) {
+        payload.password = formData.password;
+      }
+
+      const updatedCanteen = await updateCanteen(
+        selectedCanteen.id, // already string
+        payload
+      );
+
+      setCanteens((prev) =>
+        prev.map((c) =>
+          c.id === selectedCanteen.id
+            ? mapApiCanteenToComponent(updatedCanteen)
+            : c
+        )
+      );
+
+      toast.success("Canteen updated successfully!");
+      setIsEditModalOpen(false);
+      resetForm();
+      setSelectedCanteen(null);
+    } catch (error) {
+      console.error("Error updating canteen:", error);
+      toast.error("Failed to update canteen. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!canteenId) return;
+
+  //   setLoading(true);
+  //   setError(null);
+  //   setSuccess(null);
+
+  //   try {
+  //     const data = await updateCanteen(canteenId, formData);
+  //     setSuccess(data);
+  //   } catch (err: any) {
+  //     setError(err.message || 'Failed to update canteen');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // const handleEditCanteen = (canteen: Canteen) => {
+  //   setSelectedCanteen(canteen);
+  //   setFormData({
+  //     name: canteen.name,
+  //     location: canteen.location,
+  //     manager: canteen.manager,
+  //     phone: canteen.phone,
+  //     password: "",
+  //     slug: canteen.slug,
+  //     status: canteen.status,
+  //   });
+  //   setIsEditModalOpen(true);
+  // };
   const handleEditCanteen = (canteen: Canteen) => {
     setSelectedCanteen(canteen);
     setFormData({
       name: canteen.name,
       location: canteen.location,
       manager: canteen.manager,
-      phone: canteen.phone,
+      phone: canteen.phone || "",
       password: "",
-      slug: "",
+      slug: canteen.slug,
       status: canteen.status,
     });
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateCanteen = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedCanteen) {
-      setCanteens(
-        canteens.map((canteen) =>
-          canteen.id === selectedCanteen.id
-            ? { ...canteen, ...formData }
-            : canteen
-        )
-      );
-      setIsEditModalOpen(false);
-      resetForm();
-      setSelectedCanteen(null);
-    }
-  };
+
+  // const handleUpdateCanteen = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (selectedCanteen) {
+  //     setCanteens(
+  //       canteens.map((canteen) =>
+  //         canteen.id === selectedCanteen.id
+  //           ? { ...canteen, ...formData }
+  //           : canteen
+  //       )
+  //     );
+  //     setIsEditModalOpen(false);
+  //     resetForm();
+  //     setSelectedCanteen(null);
+  //   }
+  // };
 
   const handleDeleteCanteen = (canteen: Canteen) => {
     setSelectedCanteen(canteen);
@@ -343,80 +512,27 @@ const Canteens: React.FC = () => {
     const fetchCanteens = async () => {
       setIsLoading(true);
       try {
-        const response = await getAllCanteens({
-          start: "0",
-          limit: "10",
-          search: "",
-        });
+        // get companyId from localStorage
+        const storedAdmin = localStorage.getItem("admin_user");
+        const companyId = storedAdmin ? JSON.parse(storedAdmin).id : null;
 
-        if (response && response.data && Array.isArray(response.data)) {
-          const mappedCanteens = response.data.map(mapApiCanteenToComponent);
-          setCanteens(mappedCanteens);
-        } else if (response && Array.isArray(response)) {
+        if (!companyId) {
+          console.error("No companyId found in localStorage");
+          setCanteens([]);
+          return;
+        }
+
+        const response = await getCanteensByCompanyId(companyId);
+
+        if (response && Array.isArray(response)) {
           const mappedCanteens = response.map(mapApiCanteenToComponent);
           setCanteens(mappedCanteens);
         } else {
           setCanteens([]);
         }
       } catch (error) {
-        try {
-          const altResponse = await getAllCanteensAlternative();
-          if (
-            altResponse &&
-            altResponse.data &&
-            Array.isArray(altResponse.data)
-          ) {
-            const mappedCanteens = altResponse.data.map(
-              mapApiCanteenToComponent
-            );
-            setCanteens(mappedCanteens);
-          } else if (altResponse && Array.isArray(altResponse)) {
-            const mappedCanteens = altResponse.map(mapApiCanteenToComponent);
-            setCanteens(mappedCanteens);
-          } else {
-            console.log("No valid canteen data in alternative response");
-          }
-        } catch (altError) {
-          console.error("Alternative endpoint also failed:", altError);
-          try {
-            console.log("Trying with query parameters...");
-            const queryResponse = await getAllCanteensWithQuery({
-              start: "0",
-              limit: "10",
-              search: "",
-            });
-            console.log("Query API response:", queryResponse);
-            if (
-              queryResponse &&
-              queryResponse.data &&
-              Array.isArray(queryResponse.data)
-            ) {
-              console.log(
-                "Setting canteens from query response.data:",
-                queryResponse.data
-              );
-              const mappedCanteens = queryResponse.data.map(
-                mapApiCanteenToComponent
-              );
-              setCanteens(mappedCanteens);
-            } else if (queryResponse && Array.isArray(queryResponse)) {
-              console.log(
-                "Setting canteens from direct query response:",
-                queryResponse
-              );
-              const mappedCanteens = queryResponse.map(
-                mapApiCanteenToComponent
-              );
-              setCanteens(mappedCanteens);
-            } else {
-              console.log("No valid canteen data in query response");
-            }
-          } catch (queryError) {
-            console.error("All endpoints failed:", queryError);
-            // Set empty array if all endpoints fail
-            setCanteens([]);
-          }
-        }
+        console.error("Failed to fetch canteens:", error);
+        setCanteens([]);
       } finally {
         setIsLoading(false);
       }
@@ -424,6 +540,7 @@ const Canteens: React.FC = () => {
 
     fetchCanteens();
   }, []);
+
 
   return (
     <div className="space-y-6">
@@ -483,7 +600,8 @@ const Canteens: React.FC = () => {
                     <div className="flex items-center space-x-2 text-gray-600">
                       <MapPin className="w-4 h-4" />
                       <span className="text-sm">
-                        {canteen.location || "No location"}
+                        {canteen.location || "No location"} ,  {canteen.slug || "No phone"}
+
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
@@ -492,14 +610,21 @@ const Canteens: React.FC = () => {
                         {canteen.phone || "No phone"}
                       </span>
                     </div>
+
+                    {/* <div className="flex items-center space-x-2 text-gray-600">
+                      <Phone className="w-4 h-4" />
+                      <span className="text-sm">
+                      </span>
+                    </div> */}
+
+
                   </div>
                 </div>
                 <span
-                  className={`px-3 py-1 text-sm font-medium rounded-full ${
-                    (canteen.status || "active") === "active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
+                  className={`px-3 py-1 text-sm font-medium rounded-full ${(canteen.status || "active") === "active"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                    }`}
                 >
                   {canteen.status || "active"}
                 </span>
