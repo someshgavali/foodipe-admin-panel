@@ -133,5 +133,32 @@ export const getAllCountCanteen = async(canteenId : any)=>{
     return response.data
 }
 
+export interface Canteen {
+    id: number;
+    name: string;
+    location?: string;
+    // add more fields from your backend response
+}
+
+export const getCanteensByCompanyId = async (companyId: number): Promise<Canteen[]> => {
+    try {
+        const storedAdmin = localStorage.getItem("admin_user");
+        const token = storedAdmin ? JSON.parse(storedAdmin).token : null;
+
+        const response = await axiosInstance.get(
+            `/canteen/getCanteenByCompanyId/${companyId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching canteens by company ID:", error);
+        throw error;
+    }
+};
 
 export { createCanteen ,getCategoryByCanteen,};

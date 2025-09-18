@@ -1,13 +1,30 @@
+// export interface User {
+//   id: string;
+//   name: string;
+//   email: string;
+//   role: string;
+//   status: 'active' | 'inactive';
+//   createdAt: string;
+// }
+
 export interface User {
-  id: string;
+  userId: number;
   name: string;
   email: string;
-  role: string;
-  status: 'active' | 'inactive';
-  createdAt: string;
+  phonenumber: string;
+  empid: string;
+  address: string;
+  walletBalance: string;
+  companyid: number;
+  Company: {
+    id: number;
+    company_name: string;
+  };
+  createddate: string;
 }
 
 export interface Canteen {
+  canteenid?: string;
   id: string;
   name: string;
   location: string;

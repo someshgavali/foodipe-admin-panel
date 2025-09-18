@@ -36,18 +36,19 @@ export const getCompanies = async (params: CompanyParams = {}): Promise<CompanyR
     }
 };
 
-interface CreateCompanyPayload {
-    company_name: string;
-    address: string;
-    no_of_employee: number;
-    location?: string;
-}
+// interface CreateCompanyPayload {
+//     company_name: string;
+//     address: string;
+//     no_of_employee: number;
+//     location?: string;
+// }
 
-interface CreateCompanyResponse {
-    message: string;
-    data?: Company;
-}
+// interface CreateCompanyResponse {
+//     message: string;
+//     data?: Company;
+// }
 
+<<<<<<< HEAD
 export const createCompany = async (payload: CreateCompanyPayload): Promise<CreateCompanyResponse> => {
     try {
         const response = await axiosInstance.post('company/createCompany', payload);
@@ -56,6 +57,16 @@ export const createCompany = async (payload: CreateCompanyPayload): Promise<Crea
         throw error;
     }
 };
+=======
+// export const createCompany = async (payload: CreateCompanyPayload): Promise<CreateCompanyResponse> => {
+//     try {
+//         const response = await axiosInstance.post('/company/createCompany', payload);
+//         return response.data;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
+>>>>>>> bb663541d1f2a0cef4766a9471a41ab91153c122
 
 interface RoleParams {
     start?: string;
@@ -83,6 +94,58 @@ export const getAllRoles = async (params: RoleParams = {}): Promise<RoleResponse
         return response.data;
     } catch (error) {
         console.error("getAllRoles API Error:", error);
+        throw error;
+    }
+};
+
+
+// Update your api/adminApi/company.ts file
+
+interface CreateCompanyPayload {
+    company_name: string;
+    email: string;
+    password: string;
+    company_code: string;
+    no_of_employee: string;
+    no_of_restraunt: string;
+    address: string;
+    roleid: string;
+}
+
+interface CreateCompanyResponse {
+    message: string;
+    data?: Company;
+}
+
+export const createCompany = async (payload: CreateCompanyPayload): Promise<CreateCompanyResponse> => {
+    try {
+        const response = await axiosInstance.post('/company/createCompany', payload);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Update company API
+interface UpdateCompanyPayload {
+    name?: string;
+    email?: string;
+    password?: string;
+}
+
+interface UpdateCompanyResponse {
+    message?: string;
+    data?: any;
+}
+
+export const updateCompany = async (
+    id: string,
+    payload: UpdateCompanyPayload
+): Promise<UpdateCompanyResponse> => {
+    try {
+        const response = await axiosInstance.put(`/company/updateCompany/${id}`, payload);
+        return response.data;
+    } catch (error) {
         throw error;
     }
 };
