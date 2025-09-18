@@ -48,16 +48,6 @@ export const getCompanies = async (params: CompanyParams = {}): Promise<CompanyR
 //     data?: Company;
 // }
 
-<<<<<<< HEAD
-export const createCompany = async (payload: CreateCompanyPayload): Promise<CreateCompanyResponse> => {
-    try {
-        const response = await axiosInstance.post('company/createCompany', payload);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
-=======
 // export const createCompany = async (payload: CreateCompanyPayload): Promise<CreateCompanyResponse> => {
 //     try {
 //         const response = await axiosInstance.post('/company/createCompany', payload);
@@ -66,7 +56,6 @@ export const createCompany = async (payload: CreateCompanyPayload): Promise<Crea
 //         throw error;
 //     }
 // };
->>>>>>> bb663541d1f2a0cef4766a9471a41ab91153c122
 
 interface RoleParams {
     start?: string;
