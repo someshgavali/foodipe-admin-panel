@@ -1,6 +1,5 @@
-// HTTP client using fetch API
-// const baseURL = "https://be-foodiepe-rurh.onrender.com";
-const baseURL = "http://192.168.1.15:8084";
+// const baseURL = "https://be-foodiepe-rurh.onrender.com/";
+const baseURL = "http://192.168.1.13:8084/";
 
 
 interface RequestOptions extends RequestInit {

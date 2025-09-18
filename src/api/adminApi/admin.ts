@@ -40,7 +40,7 @@ interface LoginResponse {
 
 // Admin API methods
 export const adminLogin = async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await axiosInstance.post<LoginResponse>('/adminUser/login', { email, password });
+    const response = await axiosInstance.post<LoginResponse>('adminUser/login', { email, password });
     return response.data;
 };
 
@@ -79,7 +79,7 @@ export const getAllUsers = async (params: UserParams = {}): Promise<UserResponse
     try {
         console.log("Making API call to getAllUsers with params:", params);
 
-        const response = await axiosInstance.get('/user/getAllUsers', {
+        const response = await axiosInstance.get('user/getAllUsers', {
             params: params
         });
 

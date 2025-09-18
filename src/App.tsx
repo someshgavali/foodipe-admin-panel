@@ -15,7 +15,9 @@ import Users from "./pages/Users";
 import Canteens from "./pages/Canteens";
 import Categories from "./pages/Categories";
 import Subcategories from "./pages/Subcategories";
+import SubcategoryTypes from "./pages/SubcategoryTypes";
 import MenuItems from "./pages/MenuItems";
+import Orders from "./pages/Orders";
 import Company from "./pages/Company";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -41,7 +43,9 @@ function App() {
             <Route path="canteens" element={<Canteens />} />
             <Route path="categories" element={<Categories />} />
             <Route path="subcategories" element={<Subcategories />} />
+            <Route path="subcategory-types" element={<SubcategoryTypes />} />
             <Route path="menu-items" element={<MenuItems />} />
+            <Route path="orders" element={<Orders />} />
           </Route>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>

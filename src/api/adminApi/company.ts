@@ -25,8 +25,7 @@ interface CompanyResponse {
 
 export const getCompanies = async (params: CompanyParams = {}): Promise<CompanyResponse> => {
     try {
-        console.log("Making API call to getCompanies with params:", params);
-        const response = await axiosInstance.get('/company/getAllCompanies', {
+        const response = await axiosInstance.get('company/getAllCompanies', {
             params: params
         });
         console.log("Companies API Response:", response);
@@ -51,7 +50,7 @@ interface CreateCompanyResponse {
 
 export const createCompany = async (payload: CreateCompanyPayload): Promise<CreateCompanyResponse> => {
     try {
-        const response = await axiosInstance.post('/company/createCompany', payload);
+        const response = await axiosInstance.post('company/createCompany', payload);
         return response.data;
     } catch (error) {
         throw error;
@@ -77,8 +76,7 @@ interface RoleResponse {
 
 export const getAllRoles = async (params: RoleParams = {}): Promise<RoleResponse> => {
     try {
-        console.log("Making API call to getAllRoles with params:", params);
-        const response = await axiosInstance.post('/role/getAllRoles', {
+        const response = await axiosInstance.post('role/getAllRoles', {
             params: params
         });
         console.log("Roles API Response:", response);
