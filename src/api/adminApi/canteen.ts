@@ -10,7 +10,7 @@ export const getAllCanteens = async (params: CanteenParams = {}) => {
     try {
         console.log("With params:", params);
 
-        const response = await axiosInstance.get('/canteen/getAllCanteens');
+        const response = await axiosInstance.get('canteen/getAllCanteens');
 
         console.log("API Response:", response);
         return response.data;
@@ -25,7 +25,7 @@ export const getAllCanteensAlternative = async (_params: CanteenParams = {}) => 
     try {
         // Try GET request instead of POST
         console.log("Trying GET request to:", `${axiosInstance.baseURL}/canteens`);
-        const response = await axiosInstance.get('/canteens');
+        const response = await axiosInstance.get('canteens');
         console.log("GET API Response:", response);
         return response.data;
     } catch (error) {
@@ -46,7 +46,7 @@ export const getAllCanteensWithQuery = async (params: CanteenParams = {}) => {
         });
 
         console.log("Trying GET with query params:", `${axiosInstance.baseURL}/canteens?${queryParams}`);
-        const response = await axiosInstance.get(`/canteens?${queryParams}`);
+        const response = await axiosInstance.get(`canteens?${queryParams}`);
         console.log("GET with query API Response:", response);
         return response.data;
     } catch (error) {
@@ -57,12 +57,12 @@ export const getAllCanteensWithQuery = async (params: CanteenParams = {}) => {
 
 
 const createCanteen = async (canteenData: any) => {
-    const response = await axiosInstance.post('/canteen/createCanteen', canteenData);
+    const response = await axiosInstance.post('canteen/createCanteen', canteenData);
     return response.data;
 }
 
 const getCategoryByCanteen = async (canteenId:any) => {
-    const response = await axiosInstance.get(`/category/getCategoryByCanteen/${canteenId}`);
+    const response = await axiosInstance.get(`category/getCategoryByCanteen/${canteenId}`);
     return response.data;
 }
 
@@ -75,24 +75,63 @@ export const getCategoriesByCanteenId = async (canteenId: string) => {
 
 
 export const getSubcategoriesByUserId = async (userId: string) => {
-    const response = await axiosInstance.get(`/canteenSubCategories/getSubCategoriesByCanteen/${userId}`);
+    const response = await axiosInstance.get(`canteenSubCategories/getSubCategoriesByCanteen/${userId}`);
     return response.data;
 }
 
 export const createcategory = async (payload: any) => {
-    const response = await axiosInstance.post("/canteenCategories/createCategoriesItem",payload);
+    const response = await axiosInstance.post("canteenCategories/createCategoriesItem",payload);
     return response.data;
 }
 
-// export const updateCategoryById = async (categoryId, payload) => {
-//     const response = await axiosInstance.post(
-//         `/canteenCategories/createCategoriesItem/${categoryId}`,
-//         payload
-//     );
-//     return response.data;
-// };
+export const updateCategoryById = async (categoryId: string | number, payload: any) => {
+    const response = await axiosInstance.put(
+        `canteenCategories/updateCategoriesItem/${categoryId}`,
+        payload
+    );
+    return response.data;
+};
+
+export const getAllcategoriesSubTypesByCanteenId = async (canteenId: any)=>{
+    const response = await axiosInstance.get(`canteenCategoriesSubTypes/getAllcategoriesSubTypesByCanteenId/${canteenId}`)
+    return response.data
+}
+
+export const updateSubTypesBySubCategoryTypeId = async (
+    subcategoryTypeId: string | number,
+    payload: { canteencategoriesid: string | number; itemName: string; subCatTypeImg: string; is_available: boolean }
+)=>{
+    const response = await axiosInstance.put(
+        `canteenCategoriesSubTypes/updateCategoriesSubTypeItem/${subcategoryTypeId}`,
+        payload
+    )
+    return response.data
+}
+
+export const createCategoriesSubTypeItem = async (payload: { canteencategoriesid: string | number; itemName: string; subCatTypeImg: string; is_available: boolean })=>{
+    const response = await axiosInstance.post("canteenCategoriesSubTypes/createCategoriesSubTypeItem",payload)
+    return response.data
+}
+
+export const getSubCategoryByCanteenId = async (canteenId : any) =>{
+    const response = await axiosInstance.get(`canteenSubCategories/getAllSubcategoriesByCanteenId/${canteenId}`)
+    return response.data
+}
+
+export const createSubCategory = async (payload: any)=>{
+    const response = await axiosInstance.post("canteenSubCategories/createSubCategoriesItem",payload)
+    return response.data
+}
+
+export const updateOrderStatus = async (orderId: string | number, payload: any)=>{
+    const response = await axiosInstance.put(`cart/updateOrderStatus/${orderId}`,payload)
+    return response.data
+}
+
+export const getAllCountCanteen = async(canteenId : any)=>{
+    const response = await axiosInstance.get(`adminUser/getAllCountForCanteen/${canteenId}`)
+    return response.data
+}
 
 
-
-
-export { createCanteen ,getCategoryByCanteen};
+export { createCanteen ,getCategoryByCanteen,};

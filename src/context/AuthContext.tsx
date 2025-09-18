@@ -26,6 +26,7 @@ interface User {
   name?: string;
   token?: string;
   role?: RoleInfo;
+  canteenId?: number | string;
 }
 
 interface AuthContextType {
@@ -72,7 +73,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: apiUser.email,
         name: apiUser.company_name || apiUser.name,
         token: apiUser.token,
-        role: apiUser.role
+        role: apiUser.role,
+        canteenId: apiUser.canteenid
       };
       setUser(userData);
       localStorage.setItem('admin_user', JSON.stringify(userData));

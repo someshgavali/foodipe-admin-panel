@@ -17,7 +17,6 @@ interface Company {
 interface Role {
     id: number;
     role_name: string;
-    // Add other role properties as needed
 }
 
 
@@ -55,7 +54,6 @@ const Company: React.FC = () => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Helper function to map API response to component format
     const mapApiCompanyToComponent = (apiCompany: any): Company => ({
         id: apiCompany.id || Date.now(),
         company_name: apiCompany.company_name || 'Unnamed Company',
@@ -89,18 +87,14 @@ const Company: React.FC = () => {
                     search: "",
                 });
 
-                console.log("Companies API response:", response);
 
                 if (response && response.data && Array.isArray(response.data)) {
-                    console.log("Setting companies from response.data:", response.data);
                     const mappedCompanies = response.data.map(mapApiCompanyToComponent);
                     setCompanies(mappedCompanies);
                 } else if (Array.isArray(response)) {
-                    console.log("Setting companies from direct response:", response);
                     const mappedCompanies = response.map(mapApiCompanyToComponent);
                     setCompanies(mappedCompanies);
                 } else {
-                    console.log("No valid company data found in response");
                     setCompanies([]);
                 }
             } catch (error) {
@@ -122,10 +116,6 @@ const Company: React.FC = () => {
                 limit: "100",
                 search: "",
             });
-
-            console.log("Roles API response:", response);
-
-            // Handle different response structures
             if (response && response.data && Array.isArray(response.data)) {
                 setRoles(response.data);
             } else if (Array.isArray(response)) {
@@ -176,7 +166,6 @@ const Company: React.FC = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            // Use simplified create company for Super Admin basic flow
             await createCompany({
                 company_name: formData.company_name,
                 address: formData.address,
@@ -184,7 +173,6 @@ const Company: React.FC = () => {
 
             });
             handleFormClose();
-            // Refetch list
             setIsLoading(true);
             const response = await getCompanies({ start: "0", limit: "10", search: "" });
             if (response && (response as any).data && Array.isArray((response as any).data)) {
@@ -211,7 +199,6 @@ const Company: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Companies</h1>
@@ -226,7 +213,6 @@ const Company: React.FC = () => {
                 </button>
             </div>
 
-            {/* Add Company Form Modal */}
             {showAddForm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -402,7 +388,6 @@ const Company: React.FC = () => {
                 </div>
             )}
 
-            {/* Search */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -416,7 +401,6 @@ const Company: React.FC = () => {
                 </div>
             </div>
 
-            {/* Loading State */}
             {isLoading && (
                 <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -424,7 +408,6 @@ const Company: React.FC = () => {
                 </div>
             )}
 
-            {/* Companies Grid */}
             {!isLoading && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredCompanies.map((company, index) => (

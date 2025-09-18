@@ -1,6 +1,6 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard,
   Users,
@@ -9,8 +9,8 @@ import {
   FolderOpen,
   UtensilsCrossed,
   LogOut,
-  ChevronRight
-} from 'lucide-react';
+  ChevronRight,
+} from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,25 +23,81 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const userIsSuperAdmin = isSuperAdmin();
 
   const baseItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', visible: true },
+    {
+      path: "/dashboard",
+      icon: LayoutDashboard,
+      label: "Dashboard",
+      visible: true,
+    },
+    // Orders visible for canteen users (Canteen Service) and superadmin
+    {
+      path: "/dashboard/orders",
+      icon: UtensilsCrossed,
+      label: "Orders",
+      visible: hasPermission("Canteen Service") || userIsSuperAdmin,
+    },
     // Keep superadmin-only items intact
-    { path: '/dashboard/users', icon: Users, label: 'Users', visible: hasPermission('UserService', '/user/getAllUsers', 'GET') || userIsSuperAdmin },
-    { path: '/dashboard/company', icon: Users, label: 'Companies', visible: userIsSuperAdmin },
+    {
+      path: "/dashboard/users",
+      icon: Users,
+      label: "Users",
+      visible:
+        hasPermission("UserService", "/user/getAllUsers", "GET") ||
+        userIsSuperAdmin,
+    },
+    {
+      path: "/dashboard/company",
+      icon: Users,
+      label: "Companies",
+      visible: userIsSuperAdmin,
+    },
     // Canteen-scoped items based on Canteen Service permissions
-    { path: '/dashboard/canteens', icon: Building2, label: 'Canteens', visible: userIsSuperAdmin },
-    { path: '/dashboard/categories', icon: Folder, label: 'Categories', visible: hasPermission('Canteen Service', '/canteenCategories/getCanteensCategories', 'GET') },
-    { path: '/dashboard/subcategories', icon: FolderOpen, label: 'Subcategories', visible: hasPermission('Canteen Service', '/canteenSubCategories/getSubCanteensCategories', 'GET') },
-    { path: '/dashboard/menu-items', icon: UtensilsCrossed, label: 'Menu Items', visible: hasPermission('Canteen Service') },
+    {
+      path: "/dashboard/canteens",
+      icon: Building2,
+      label: "Canteens",
+      visible: userIsSuperAdmin,
+    },
+    {
+      path: "/dashboard/subcategories",
+      icon: UtensilsCrossed,
+      label: "Menus",
+      visible: hasPermission(
+        "Canteen Service",
+        "/canteenSubCategories/getSubCanteensCategories",
+        "GET"
+      ),
+    },
+    {
+      path: "/dashboard/categories",
+      icon: Folder,
+      label: "Categories",
+      visible: hasPermission(
+        "Canteen Service",
+        "/canteenCategories/getCanteensCategories",
+        "GET"
+      ),
+    },
+    {
+      path: "/dashboard/subcategory-types",
+      icon: FolderOpen,
+      label: "Subcategories Types",
+      visible: hasPermission(
+        "Canteen Service",
+        "/canteenSubCategories/getSubCanteensCategories",
+        "GET"
+      ),
+    },
   ];
 
   // Filter menu items based on visibility
-  const menuItems = baseItems.filter(item => item.visible);
+  const menuItems = baseItems.filter((item) => item.visible);
 
   return (
     <>
@@ -54,12 +110,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
       )}
 
       {/* Sidebar */}
-      <div className={`
+      <div
+        className={`
         fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-transform duration-300 z-30
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0 lg:static lg:z-0 lg:h-screen
         w-64 flex flex-col
-      `}>
+      `}
+      >
         {/* Header - Fixed at top */}
         <div className="flex-shrink-0 p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
@@ -68,14 +126,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Foodipe</h1>
-              <p className="text-sm text-gray-500">Admin Panel</p>
+              <p className="text-sm text-gray-500">Restaurant Admin Panel</p>
             </div>
           </div>
         </div>
 
         {/* Navigation - Scrollable middle section */}
         <nav className="flex-1 overflow-y-auto p-4">
-          <p className="px-4 pb-2 text-xs font-semibold tracking-wider text-gray-400 uppercase">Navigation</p>
+          <p className="px-4 pb-2 text-xs font-semibold tracking-wider text-gray-400 uppercase">
+            Navigation
+          </p>
           <div className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -84,30 +144,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  end={item.path === '/dashboard'}
+                  end={item.path === "/dashboard"}
                   className={({ isActive }) => `
                     group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                    ${isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-100'
+                    ${
+                      isActive
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-100"
                     }
                   `}
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
-                        isActive 
-                          ? 'border-white/30 bg-white/10 text-white' 
-                          : 'border-gray-200 bg-white text-gray-600 group-hover:border-gray-300'
-                      }`}>
+                      <span
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
+                          isActive
+                            ? "border-white/30 bg-white/10 text-white"
+                            : "border-gray-200 bg-white text-gray-600 group-hover:border-gray-300"
+                        }`}
+                      >
                         <Icon className="w-4 h-4" />
                       </span>
                       <span className="font-medium">{item.label}</span>
-                      <ChevronRight className={`w-4 h-4 ml-auto ${
-                        isActive 
-                          ? 'text-white' 
-                          : 'text-gray-300 group-hover:text-gray-400'
-                      }`} />
+                      <ChevronRight
+                        className={`w-4 h-4 ml-auto ${
+                          isActive
+                            ? "text-white"
+                            : "text-gray-300 group-hover:text-gray-400"
+                        }`}
+                      />
                     </>
                   )}
                 </NavLink>
@@ -126,7 +191,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.name}
+                </p>
                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
